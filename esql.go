@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/codenotary/immudb/embedded/store"
 	"github.com/codenotary/immudb/pkg/sql"
+	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
@@ -57,6 +59,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	consoleTable := tablewriter.NewWriter(os.Stdout)
+	consoleTable.SetHeader([]string{"Id", "Title"})
+
 	for i := 0; i < rowCount; i++ {
 		row, err := r.Read()
 		if err != nil {
@@ -70,5 +75,13 @@ func main() {
 		if fmt.Sprintf("title%d", i) != row.Values[1] {
 			log.Fatalf("expected %s, actual %s", fmt.Sprintf("title%d", i), row.Values[1])
 		}
+
+		consoleRow := make([]string, 0)
+		for _, consoleCol := range row.Values {
+			consoleRow = append(consoleRow, fmt.Sprintf("%v", consoleCol))
+		}
+		consoleTable.Append(consoleRow)
+
 	}
+	consoleTable.Render()
 }
